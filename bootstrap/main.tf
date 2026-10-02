@@ -76,4 +76,16 @@ resource "azurerm_role_assignment" "avd_r_role" {
   role_definition_name = "Contributor"
   principal_id         = var.pipeline_sp_object_id
   principal_type       = "ServicePrincipal"
-}   
+}
+
+data "azurerm_client_config" "current" {
+
+}
+
+# Role assignemnet for the current user to access the state storage account
+resource "azurerm_role_assignment" "st_role_me" {
+  scope                = azurerm_storage_account.sa_state.id
+  role_definition_name = "Storage Blob Data Contributor"
+  principal_id         = data.azurerm_client_config.current.object_id
+  principal_type       = "User"
+}

@@ -7,18 +7,19 @@ terraform {
       version = "~>5.7"
     }
   }
+
   backend "azurerm" {
     resource_group_name  = "rg-avd-state"
     storage_account_name = "stavdtfstatecj291"
     container_name       = "tfstate"
-    key                  = "bootstrap.tfstate"
+    key                  = "avd-personal.tfstate"
     use_azuread_auth     = true
   }
 }
 
-# Configure the Azure Provider
+# Configure the Azure Provider 
 provider "azurerm" {
   features {}
   subscription_id = var.subscription_id
 }
-
+  
