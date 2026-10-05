@@ -23,3 +23,18 @@ module "network" {
   nsg_name                = "nsg-avd-personal"
   tags                    = local.common_tags
 }
+
+module "avd_core" {
+  source                           = "../../modules/avd-core"
+  resource_group_name              = data.azurerm_resource_group.rg.name
+  location                         = data.azurerm_resource_group.rg.location
+  host_pool_name                   = "hp-avd-personal"
+  host_pool_type                   = "Personal"
+  load_balancer_type               = "Persistent"
+  preferred_app_group_type         = "Desktop"
+  personal_desktop_assignment_type = "Automatic"
+  app_group_name                   = "ag-avd-personal-desktop"
+  app_group_type                   = "Desktop"
+  workspace_name                   = "ws-avd-personal"
+  tags                             = local.common_tags
+}
