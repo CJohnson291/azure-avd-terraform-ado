@@ -30,12 +30,14 @@ resource "azurerm_windows_virtual_machine" "vm" {
   admin_username        = var.admin_username
   admin_password        = random_password.admin.result
   license_type          = "Windows_Client"
+  secure_boot_enabled   = true
+  vtpm_enabled          = true
   tags                  = var.tags
 
   identity {
     type = "SystemAssigned"
   }
-  
+
   os_disk {
     caching              = "ReadWrite"
     storage_account_type = "StandardSSD_LRS"
@@ -47,4 +49,49 @@ resource "azurerm_windows_virtual_machine" "vm" {
     sku       = var.image_sku
     version   = "latest"
   }
+}
+
+resource "azurerm_virtual_machine_extension" "entra_join" {
+  name                       = "AADLoginForWindows"
+  virtual_machine_id         = azurerm_windows_virtual_machine.vm.id
+  publisher                  = "Microsoft.Azure.ActiveDirectory"
+  type                       = "AADLoginForWindows"
+  type_handler_version       = "2.0"
+  auto_upgrade_minor_version = true
+
+}
+
+resource "time_rotating" "token" {
+  rotation_days = 7
+}
+
+resource "azurerm_virtual_desktop_host_pool_registration_info" "token" {
+  hostpool_id     = var.host_pool_id
+  expiration_date = time_rotating.token.rotation_rfc3339
+}
+
+resource "azurerm_virtual_machine_extension" "avd_agent" {
+  name                       = "AVDAgent"
+  virtual_machine_id         = azurerm_windows_virtual_machine.vm.id
+  publisher                  = "Microsoft.Powershell"
+  type                       = "DSC"
+  type_handler_version       = "2.73"
+  auto_upgrade_minor_version = true
+
+  settings = jsonencode({
+    modulesUrl            = "https://wvdportalstorageblob.blob.core.windows.net/galleryartifacts/Configuration_1.0.02797.442.zip"
+    configurationFunction = "Configuration.ps1\\AddSessionHost"
+    properties = {
+      hostPoolName = var.host_pool_name
+      aadJoin      = true
+    }
+  })
+
+  protected_settings = jsonencode({
+    properties = {
+      registrationInfoToken = azurerm_virtual_desktop_host_pool_registration_info.token.token
+    }
+  })
+  depends_on = [azurerm_virtual_machine_extension.entra_join]
+
 }

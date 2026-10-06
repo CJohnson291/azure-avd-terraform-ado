@@ -38,3 +38,17 @@ module "avd_core" {
   workspace_name                   = "ws-avd-personal"
   tags                             = local.common_tags
 }
+
+module "session_hosts" {
+  source              = "../../modules/session-hosts"
+  location            = data.azurerm_resource_group.rg.location
+  resource_group_name = data.azurerm_resource_group.rg.name
+  subnet_id           = module.network.subnet_id
+  host_pool_id        = module.avd_core.host_pool_id
+  host_pool_name      = module.avd_core.host_pool_name
+  vm_name             = "vm-avdp-01"
+  vm_size             = "Standard_B2s_v2"
+  image_sku           = "Win11-25h2-ent"
+  admin_username      = "avdlocaladmin"
+  tags                = local.common_tags
+}
