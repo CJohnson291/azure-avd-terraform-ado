@@ -52,3 +52,17 @@ module "session_hosts" {
   admin_username      = "avdlocaladmin"
   tags                = local.common_tags
 }
+
+resource "azurerm_role_assignment" "ag_desktop_user" {
+  principal_id         = var.avd_users_group_object_id
+  principal_type       = "Group"
+  role_definition_name = "Desktop Virtualization User"
+  scope                = module.avd_core.application_group_id
+}
+
+resource "azurerm_role_assignment" "vm_user_login" {
+  principal_id         = var.avd_users_group_object_id
+  principal_type       = "Group"
+  role_definition_name = "Virtual Machine User Login"
+  scope                = data.azurerm_resource_group.rg.id
+}
