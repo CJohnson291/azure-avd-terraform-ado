@@ -62,3 +62,17 @@ resource "azurerm_role_assignment" "vm_user_login" {
   role_definition_name = "Virtual Machine User Login"
   scope                = data.azurerm_resource_group.rg.id
 }
+
+module "session_hosts" {
+  source              = "../../modules/session-hosts"
+  location            = data.azurerm_resource_group.rg.location
+  resource_group_name = data.azurerm_resource_group.rg.name
+  subnet_id           = module.network.subnet_id
+  host_pool_id        = module.avd_core.host_pool_id
+  host_pool_name      = module.avd_core.host_pool_name
+  vm_name             = "vm-avdr-01"
+  vm_size             = "Standard_D2as_v6"
+  image_sku           = "win11-25h2-avd"
+  admin_username      = "avdlocaladmin"
+  tags                = local.common_tags
+}
