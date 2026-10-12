@@ -76,3 +76,35 @@ module "session_hosts" {
   admin_username      = "avdlocaladmin"
   tags                = local.common_tags
 }
+
+# Storage account for fslogix
+resource "azurerm_storage_account" "fslogix" {
+  name                            = "stavdfslogixcj291"
+  resource_group_name             = data.azurerm_resource_group.rg.name
+  location                        = data.azurerm_resource_group.rg.location
+  account_tier                    = "Standard"
+  account_replication_type        = "LRS"
+  min_tls_version                 = "TLS1_2"
+  allow_nested_items_to_be_public = false
+
+  azure_files_authentication {
+    directory_type = "AADKERB"
+  }
+  tags = local.common_tags
+}
+
+# File share for fslogix
+resource "azurerm_storage_share" "fslogix" {
+  name               = "fslogix"
+  storage_account_id = azurerm_storage_account.fslogix.id
+  quota              = 70
+
+}
+
+# Role assignment for the AVD contractors group to access the fslogix storage share
+resource "azurerm_role_assignment" "fslogix_role" {
+  scope                = azurerm_storage_share.fslogix.rbac_scope_id
+  role_definition_name = "Storage File Data SMB Share Contributor"
+  principal_id         = var.avd_users_group_object_id
+  principal_type       = "Group"
+}   
