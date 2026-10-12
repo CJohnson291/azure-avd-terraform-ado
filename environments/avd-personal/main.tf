@@ -48,7 +48,7 @@ module "session_hosts" {
   host_pool_name      = module.avd_core.host_pool_name
   vm_name             = "vm-avdp-01"
   vm_size             = "Standard_D2as_v6"
-  image_sku           = "Win11-25h2-ent"
+  image_sku           = "win11-25h2-ent"
   admin_username      = "avdlocaladmin"
   tags                = local.common_tags
 }
