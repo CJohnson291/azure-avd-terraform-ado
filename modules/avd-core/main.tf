@@ -7,7 +7,7 @@ resource "azurerm_virtual_desktop_host_pool" "hp" {
   preferred_app_group_type         = var.preferred_app_group_type
   personal_desktop_assignment_type = var.personal_desktop_assignment_type
   maximum_sessions_allowed         = var.maximum_sessions_allowed
-  custom_rdp_properties            = "targetisaadjoined:i:1"
+  custom_rdp_properties            = "targetisaadjoined:i:1;"
   tags                             = var.tags
 
 }
