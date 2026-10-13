@@ -70,6 +70,15 @@ resource "azurerm_virtual_desktop_host_pool_registration_info" "token" {
   expiration_date = time_rotating.token.rotation_rfc3339
 }
 
+locals {
+  fslogix_script = <<-EOT
+    reg add "HKLM\SOFTWARE\FSLogix\Profiles" /v Enabled /t REG_DWORD /d 1 /f
+    reg add "HKLM\SOFTWARE\FSLogix\Profiles" /v VHDLocations /t REG_MULTI_SZ /d "${var.fslogix_share_path == null ? "" : var.fslogix_share_path}" /f
+    reg add "HKLM\SYSTEM\CurrentControlSet\Control\Lsa\Kerberos\Parameters" /v CloudKerberosTicketRetrievalEnabled /t REG_DWORD /d 1 /f
+    reg add "HKLM\Software\Policies\Microsoft\AzureADAccount" /v LoadCredKeyFromProfile /t REG_DWORD /d 1 /f
+EOT
+}
+
 resource "azurerm_virtual_machine_extension" "avd_agent" {
   name                       = "AVDAgent"
   virtual_machine_id         = azurerm_windows_virtual_machine.vm.id
@@ -94,4 +103,18 @@ resource "azurerm_virtual_machine_extension" "avd_agent" {
   })
   depends_on = [azurerm_virtual_machine_extension.entra_join]
 
+}
+
+# Switch - if the fslogix_share_path variable is not null, then create the fslogix_config extension
+resource "azurerm_virtual_machine_extension" "fslogix_config" {
+  count                      = var.fslogix_share_path == null ? 0 : 1
+  name                       = "FSLogixConfig"
+  virtual_machine_id         = azurerm_windows_virtual_machine.vm.id
+  publisher                  = "Microsoft.Compute"
+  type                       = "CustomScriptExtension"
+  type_handler_version       = "1.10"
+  auto_upgrade_minor_version = true
+  settings = jsonencode({
+    commandToExecute = "powershell -NoProfile -ExecutionPolicy Bypass -EncodedCommand \"${textencodebase64(local.fslogix_script, "UTF-16LE")}\""
+  })
 }

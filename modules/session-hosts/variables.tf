@@ -48,3 +48,9 @@ variable "host_pool_id" {
   type        = string
   description = "Host pool ID for the session host"
 }
+
+variable "fslogix_share_path" {
+  type        = string
+  default     = null
+  description = "FSLogix file share path for the session host. Leaving this as null will not configure FSLogix on the session host."
+}

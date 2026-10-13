@@ -75,6 +75,7 @@ module "session_hosts" {
   image_sku           = "win11-25h2-avd"
   admin_username      = "avdlocaladmin"
   tags                = local.common_tags
+  fslogix_share_path  = "\\\\${azurerm_storage_account.fslogix.primary_file_host}\\${azurerm_storage_share.fslogix.name}"
 }
 
 # Storage account for fslogix
