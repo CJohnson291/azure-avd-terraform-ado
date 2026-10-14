@@ -18,3 +18,6 @@ steps:
 
   - script: terraform version
     displayName: Show Terraform version on the agent
+
+  - script: terraform fmt -check -recursive
+    displayName: Check Terraform formatting
