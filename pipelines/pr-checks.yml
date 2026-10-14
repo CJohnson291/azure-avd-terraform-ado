@@ -1,0 +1,15 @@
+# PR checks: formatting and validation only. No Azure access, nothing deployed.
+
+trigger: none          # don't run on every push to main
+
+pr:                    # do run when a pull request targets main
+  branches:
+    include:
+      - main
+
+pool:
+  vmImage: ubuntu-latest   # a fresh Microsoft-hosted Linux agent each run
+
+steps:
+  - script: terraform version
+    displayName: Show Terraform version on the agent
