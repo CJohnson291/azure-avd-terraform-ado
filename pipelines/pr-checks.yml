@@ -11,5 +11,10 @@ pool:
   vmImage: ubuntu-latest   # a fresh Microsoft-hosted Linux agent each run
 
 steps:
+  - script: |
+      curl -sSLo terraform.zip https://releases.hashicorp.com/terraform/1.12.2/terraform_1.12.2_linux_amd64.zip
+      sudo unzip -o terraform.zip -d /usr/local/bin
+    displayName: Install Terraform 1.12.2
+
   - script: terraform version
     displayName: Show Terraform version on the agent
