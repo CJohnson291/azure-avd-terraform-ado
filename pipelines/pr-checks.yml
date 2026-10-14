@@ -21,3 +21,21 @@ steps:
 
   - script: terraform fmt -check -recursive
     displayName: Check Terraform formatting
+
+  - script: |
+      terraform init -backend=false
+      terraform validate
+    workingDirectory: environments/avd-personal
+    displayName: Validate avd-personal
+
+  - script: |
+      terraform init -backend=false
+      terraform validate
+    workingDirectory: environments/avd-remoteapp
+    displayName: Validate avd-remoteapp
+
+  - script: |
+      terraform init -backend=false
+      terraform validate
+    workingDirectory: environments/bootstrap
+    displayName: Validate bootstrap
