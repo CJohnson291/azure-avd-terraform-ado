@@ -41,7 +41,7 @@ module "avd_core" {
 
 module "session_hosts" {
   count = var.deploy_session_hosts ? 1 : 0
-  
+
   source              = "../../modules/session-hosts"
   location            = data.azurerm_resource_group.rg.location
   resource_group_name = data.azurerm_resource_group.rg.name
