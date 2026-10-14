@@ -6,6 +6,38 @@ locals {
     owner      = "cj291"
     managed_by = "Terraform"
   }
+  # Roles the pipeline is allowed to assign (Desktop Virtualization User,
+  # Virtual Machine User Login, Storage File Data SMB Share Contributor)
+  pipeline_assignable_role_ids = [
+    "1d18fff3-a72a-46b5-b4a9-0b38a3cd7e63",
+    "fb879df8-f326-4884-b1cf-06f3ad86be52",
+    "0c867c2a-1d8c-454a-a3db-ab2ea1bdc8bb",
+  ]
+
+  # Rule 1: creating an assignment is only allowed for the roles above,
+  # Rule 2: deleting an assignment is only allowed for the roles above
+
+  pipeline_rbac_condition = <<-EOT
+  (
+     (
+      !(ActionMatches{'Microsoft.Authorization/roleAssignments/write'})
+     )
+     OR
+     (
+      @Request[Microsoft.Authorization/roleAssignments:RoleDefinitionId] ForAnyOfAnyValues:GuidEquals {${join(", ", local.pipeline_assignable_role_ids)}}
+     )
+    )
+    AND
+    (
+     (
+      !(ActionMatches{'Microsoft.Authorization/roleAssignments/delete'})
+     )
+     OR
+     (
+      @Resource[Microsoft.Authorization/roleAssignments:RoleDefinitionId] ForAnyOfAnyValues:GuidEquals {${join(", ", local.pipeline_assignable_role_ids)}}
+     )
+    )
+  EOT
 }
 
 # Resource group for state storage
@@ -76,6 +108,24 @@ resource "azurerm_role_assignment" "avd_r_role" {
   role_definition_name = "Contributor"
   principal_id         = var.pipeline_sp_object_id
   principal_type       = "ServicePrincipal"
+}
+
+resource "azurerm_role_assignment" "avd_p_rbac_admin" {
+  scope                = azurerm_resource_group.rg_avd_personal.id
+  role_definition_name = "Role Based Access Control Administrator"
+  principal_id         = var.pipeline_sp_object_id
+  principal_type       = "ServicePrincipal"
+  condition            = local.pipeline_rbac_condition
+  condition_version    = "2.0"
+}
+
+resource "azurerm_role_assignment" "avd_r_rbac_admin" {
+  scope                = azurerm_resource_group.rg_avd_remoteapp.id
+  role_definition_name = "Role Based Access Control Administrator"
+  principal_id         = var.pipeline_sp_object_id
+  principal_type       = "ServicePrincipal"
+  condition            = local.pipeline_rbac_condition
+  condition_version    = "2.0"
 }
 
 data "azurerm_client_config" "current" {
