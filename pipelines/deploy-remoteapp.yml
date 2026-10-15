@@ -1,0 +1,12 @@
+# Deploy pipeline for the RemoteApp environment. Run manually.
+
+trigger: none          # don't run when code is pushed to main
+
+pr: none               # never run on pull requests
+
+pool:
+  vmImage: ubuntu-latest
+
+variables:
+  - group: vg-avd-remoteapp   # brings in subscription_id and avd_users_group_object_id
+  
