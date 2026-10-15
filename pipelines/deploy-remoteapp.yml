@@ -20,6 +20,7 @@ stages:
               curl -sSLo terraform.zip https://releases.hashicorp.com/terraform/1.12.2/terraform_1.12.2_linux_amd64.zip
               sudo unzip -o terraform.zip -d /usr/local/bin
             displayName: Install Terraform 1.12.2
+          
           - task: AzureCLI@2
             displayName: Terraform init and plan
             inputs:
@@ -33,3 +34,7 @@ stages:
             env:
               TF_VAR_subscription_id: $(subscription_id)
               TF_VAR_avd_users_group_object_id: $(avd_users_group_object_id)
+          
+          - publish: environments/avd-remoteapp/tfplan
+            artifact: tfplan
+            displayName: Publish plan file
