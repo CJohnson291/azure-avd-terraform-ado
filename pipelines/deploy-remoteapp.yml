@@ -21,7 +21,7 @@ stages:
               sudo unzip -o terraform.zip -d /usr/local/bin
             displayName: Install Terraform 1.12.2
           - task: AzureCLI@2
-            displayName: Terraform init
+            displayName: Terraform init and plan
             inputs:
               azureSubscription: sc-avd-azure
               scriptType: bash
@@ -29,3 +29,7 @@ stages:
               workingDirectory: environments/avd-remoteapp
               inlineScript: |
                 terraform init
+                terraform plan -out=tfplan
+            env:
+              TF_VAR_subscription_id: $(subscription_id)
+              TF_VAR_avd_users_group_object_id: $(avd_users_group_object_id)
