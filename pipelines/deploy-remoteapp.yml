@@ -54,3 +54,14 @@ stages:
                     curl -sSLo terraform.zip https://releases.hashicorp.com/terraform/1.12.2/terraform_1.12.2_linux_amd64.zip
                     sudo unzip -o terraform.zip -d /usr/local/bin
                   displayName: Install Terraform 1.12.2
+
+                - task: AzureCLI@2
+                  displayName: Terraform init and apply
+                  inputs:
+                    azureSubscription: sc-avd-azure
+                    scriptType: bash
+                    scriptLocation: inlineScript
+                    workingDirectory: environments/avd-remoteapp
+                    inlineScript: |
+                      terraform init
+                      terraform apply $(Pipeline.Workspace)/tfplan/tfplan
