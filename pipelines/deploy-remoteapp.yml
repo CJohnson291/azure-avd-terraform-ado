@@ -9,4 +9,23 @@ pool:
 
 variables:
   - group: vg-avd-remoteapp   # brings in subscription_id and avd_users_group_object_id
-  
+
+stages:
+  - stage: Plan
+    displayName: Terraform plan
+    jobs:
+      - job: Plan
+        steps:
+          - script: |
+              curl -sSLo terraform.zip https://releases.hashicorp.com/terraform/1.12.2/terraform_1.12.2_linux_amd64.zip
+              sudo unzip -o terraform.zip -d /usr/local/bin
+            displayName: Install Terraform 1.12.2
+          - task: AzureCLI@2
+            displayName: Terraform init
+            inputs:
+              azureSubscription: sc-avd-azure
+              scriptType: bash
+              scriptLocation: inlineScript
+              workingDirectory: environments/avd-remoteapp
+              inlineScript: |
+                terraform init
