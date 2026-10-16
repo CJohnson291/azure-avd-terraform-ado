@@ -8,7 +8,7 @@ pr:                    # do run when a pull request targets main
       - main
 
 pool:
-  vmImage: ubuntu-latest   # a fresh Microsoft-hosted Linux agent each run
+  vmImage: ubuntu-24.04   # pinned: ubuntu-latest moves to Ubuntu 26 from Oct 2026
 
 steps:
   - script: |
