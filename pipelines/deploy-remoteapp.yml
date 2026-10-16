@@ -14,7 +14,7 @@ parameters:
       - 'true'
 
 pool:
-  vmImage: ubuntu-latest
+  vmImage: ubuntu-24.04   # pinned: ubuntu-latest moves to Ubuntu 26 from Oct 2026
 
 variables:
   - group: vg-avd-remoteapp   # brings in subscription_id and avd_users_group_object_id
