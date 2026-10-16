@@ -50,6 +50,14 @@ resource "azurerm_resource_group" "rg_state" {
 
 # Storage account for state storage
 resource "azurerm_storage_account" "sa_state" {
+  #checkov:skip=CKV_AZURE_33:Queue service not used
+  #checkov:skip=CKV_AZURE_59:Microsoft-hosted pipeline agent and admin laptop reach state over the public endpoint - access is Entra ID and RBAC only
+  #checkov:skip=CKV_AZURE_206:LRS chosen for minimal cost - lab environment
+  #checkov:skip=CKV2_AZURE_1:Microsoft-managed key encryption is sufficient for a lab - CMK needs Key Vault and rotation
+  #checkov:skip=CKV2_AZURE_33:Private endpoint would need a self-hosted agent - future improvement
+  #checkov:skip=CKV2_AZURE_38:Blob versioning is enabled so overwritten state is recoverable - delete retention is a future improvement
+  #checkov:skip=CKV2_AZURE_40:Backend uses Entra ID auth - disabling Shared Key entirely is a future improvement
+  #checkov:skip=CKV2_AZURE_41:No SAS tokens are issued in this project
   name                            = "stavdtfstate${var.sa_suffix}"
   resource_group_name             = azurerm_resource_group.rg_state.name
   location                        = azurerm_resource_group.rg_state.location
@@ -66,6 +74,7 @@ resource "azurerm_storage_account" "sa_state" {
 
 # Container for state storage
 resource "azurerm_storage_container" "sc_state" {
+  #checkov:skip=CKV2_AZURE_21:Storage read logging needs a Log Analytics workspace with running cost - future improvement
   name                  = "tfstate"
   storage_account_id    = azurerm_storage_account.sa_state.id
   container_access_type = "private"

@@ -42,5 +42,5 @@ steps:
 
   - script: |
       pipx install checkov
-      checkov -d . --framework terraform --compact --quiet --soft-fail
-    displayName: Checkov security scan (report only)
+      checkov -d . --framework terraform --compact --quiet 
+    displayName: Checkov security scan 

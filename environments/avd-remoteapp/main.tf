@@ -82,6 +82,14 @@ module "session_hosts" {
 
 # Storage account for fslogix
 resource "azurerm_storage_account" "fslogix" {
+  #checkov:skip=CKV_AZURE_33:Queue service not used
+  #checkov:skip=CKV_AZURE_59:Session hosts reach Azure Files over the public endpoint - private endpoint is a future improvement
+  #checkov:skip=CKV_AZURE_206:LRS chosen for minimal cost - lab environment
+  #checkov:skip=CKV2_AZURE_1:Microsoft-managed key encryption is sufficient for a lab - CMK needs Key Vault and rotation
+  #checkov:skip=CKV2_AZURE_33:Private endpoint adds cost - future improvement
+  #checkov:skip=CKV2_AZURE_38:Share soft delete accepted as future improvement for a lab
+  #checkov:skip=CKV2_AZURE_40:Disabling Shared Key needs testing against FSLogix Kerberos access - future improvement
+  #checkov:skip=CKV2_AZURE_41:No SAS tokens are issued in this project
   name                            = "stavdfslogixcj291"
   resource_group_name             = data.azurerm_resource_group.rg.name
   location                        = data.azurerm_resource_group.rg.location
