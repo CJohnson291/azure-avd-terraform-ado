@@ -39,3 +39,8 @@ steps:
       terraform validate
     workingDirectory: bootstrap
     displayName: Validate bootstrap
+
+  - script: |
+      pipx install checkov
+      checkov -d . --framework terraform --compact --quiet 
+    displayName: Checkov security scan 

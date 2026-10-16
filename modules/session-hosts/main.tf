@@ -22,6 +22,8 @@ resource "azurerm_network_interface" "nic" {
 }
 
 resource "azurerm_windows_virtual_machine" "vm" {
+  #checkov:skip=CKV_AZURE_50:AVD session hosts require extensions - host pool registration, Entra login and FSLogix settings
+  #checkov:skip=CKV_AZURE_151:Managed disks are encrypted at rest by default - encryption at host is a future improvement
   name                  = var.vm_name
   location              = var.location
   resource_group_name   = var.resource_group_name
