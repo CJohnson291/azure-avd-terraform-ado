@@ -1,0 +1,77 @@
+# Deploy pipeline for the personal environment. Run manually.
+
+trigger: none          # don't run when code is pushed to main
+
+pr: none               # never run on pull requests
+
+parameters:
+  - name: deploy_session_hosts
+    displayName: Deploy session hosts? (true creates a billable VM)
+    type: string
+    default: 'false'
+    values:
+      - 'false'
+      - 'true'
+
+pool:
+  vmImage: ubuntu-latest
+
+variables:
+  - group: vg-avd-personal   # brings in subscription_id and avd_users_group_object_id
+
+stages:
+  - stage: Plan
+    displayName: Terraform plan
+    jobs:
+      - job: Plan
+        steps:
+          - script: |
+              curl -sSLo terraform.zip https://releases.hashicorp.com/terraform/1.12.2/terraform_1.12.2_linux_amd64.zip
+              sudo unzip -o terraform.zip -d /usr/local/bin
+            displayName: Install Terraform 1.12.2
+          
+          - task: AzureCLI@2
+            displayName: Terraform init and plan
+            inputs:
+              azureSubscription: sc-avd-azure
+              scriptType: bash
+              scriptLocation: inlineScript
+              workingDirectory: environments/avd-personal
+              inlineScript: |
+                terraform init
+                terraform plan -out=tfplan
+            env:
+              TF_VAR_subscription_id: $(subscription_id)
+              TF_VAR_avd_users_group_object_id: $(avd_users_group_object_id)
+              TF_VAR_deploy_session_hosts: ${{ parameters.deploy_session_hosts }}
+          
+          - publish: environments/avd-personal/tfplan
+            artifact: tfplan
+            displayName: Publish plan file
+
+  - stage: Apply
+    displayName: Terraform apply
+    jobs:
+      - deployment: Apply
+        environment: avd-personal
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - checkout: self
+
+                - script: |
+                    curl -sSLo terraform.zip https://releases.hashicorp.com/terraform/1.12.2/terraform_1.12.2_linux_amd64.zip
+                    sudo unzip -o terraform.zip -d /usr/local/bin
+                  displayName: Install Terraform 1.12.2
+
+                - task: AzureCLI@2
+                  displayName: Terraform init and apply
+                  inputs:
+                    azureSubscription: sc-avd-azure
+                    scriptType: bash
+                    scriptLocation: inlineScript
+                    workingDirectory: environments/avd-personal
+                    inlineScript: |
+                      terraform init
+                      terraform apply $(Pipeline.Workspace)/tfplan/tfplan
