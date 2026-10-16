@@ -4,6 +4,15 @@ trigger: none          # don't run when code is pushed to main
 
 pr: none               # never run on pull requests
 
+parameters:
+  - name: deploy_session_hosts
+    displayName: Deploy session hosts? (true creates a billable VM)
+    type: string
+    default: 'false'
+    values:
+      - 'false'
+      - 'true'
+
 pool:
   vmImage: ubuntu-latest
 
@@ -34,6 +43,7 @@ stages:
             env:
               TF_VAR_subscription_id: $(subscription_id)
               TF_VAR_avd_users_group_object_id: $(avd_users_group_object_id)
+              TF_VAR_deploy_session_hosts: ${{ parameters.deploy_session_hosts }}
           
           - publish: environments/avd-remoteapp/tfplan
             artifact: tfplan
